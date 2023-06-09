@@ -526,6 +526,21 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
+    print("Applying Lora int-8")
+    from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
+
+    # Define LoRA Config
+    lora_config = LoraConfig(
+        r=1,
+        task_type=TaskType.SEQ_2_SEQ_LM
+    )
+    # prepare int-8 model for training
+    model = prepare_model_for_int8_training(model)
+
+    # add LoRA adaptor
+    model = get_peft_model(model, lora_config)
+    model.print_trainable_parameters()
+
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:
         logger.warning('Cannot use cache in models when using gradient checkpointing. turning it off')
