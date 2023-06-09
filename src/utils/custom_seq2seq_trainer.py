@@ -236,6 +236,7 @@ class CustomTrainer(Seq2SeqTrainer):
             A dictionary containing the evaluation loss and the potential metrics computed from the predictions. The
             dictionary also contains the epoch number which comes from the training state.
         """
+        print("INFO: In evaluate")
 
         gen_kwargs = gen_kwargs.copy()
         gen_kwargs["max_length"] = (

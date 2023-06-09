@@ -7,6 +7,7 @@ from datasets import load_dataset
 import torch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('mps')
 
 # example using govreport
 modelname = "abertsch/unlimiformer-bart-govreport-alternating"

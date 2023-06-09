@@ -16,6 +16,9 @@
 """
 Fine-tuning the library models for sequence to sequence.
 """
+import pdb
+# import shutup
+# shutup.please()
 # You can also adapt this script on your own sequence to sequence task. Pointers for this are left as comments.
 import logging
 import os
@@ -72,7 +75,7 @@ from metrics.metrics import HFMetricWrapper, MetricCollection
 logger = logging.getLogger('sled')
 
 PREFIX_DOC_SEP = '\n\n'
-
+TINY = True
 DEBUG = os.environ.get('DEBUG', 'false').lower() in {'1', 'true', 'yes'}  # If set, will set some configuration to help debug
 if DEBUG:
     assert not torch.cuda.is_available() or torch.cuda.device_count() == 1
@@ -403,10 +406,10 @@ def main():
     model_args, data_args, training_args, unlimiformer_args = parser.parse_dictionary_and_args()
     
     set_up_logging(training_args)
-    logger.info(f"Training Arguments: {training_args}")
-    logger.info(f"Data Arguments: {data_args}")
-    logger.info(f"Model Arguments: {model_args}")
-    logger.info(f"Unlimiformer Arguments: {unlimiformer_args}")
+    print(f"Training Arguments: {training_args}")
+    print(f"Data Arguments: {data_args}")
+    print(f"Model Arguments: {model_args}")
+    print(f"Unlimiformer Arguments: {unlimiformer_args}")
 
 
     # Added to avoid wandb.errors.UsageError: Error communicating with wandb process
@@ -489,6 +492,7 @@ def main():
         use_auth_token=training_args.use_auth_token,
     )
     if model_args.model_name_or_path is not None:
+        print(f"INFO: Loading an AutoModelForSeq2SeqLM model from {model_args.model_name_or_path}")
         model = AutoModelForSeq2SeqLM.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -497,6 +501,7 @@ def main():
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
         )
+        # pdb.set_trace()
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
@@ -544,7 +549,7 @@ def main():
     elif training_args.do_predict:
         column_names = seq2seq_dataset["test"].column_names
     else:
-        logger.info("There is nothing to do. Please pass `do_train`, `do_eval` and/or `do_predict`.")
+        print("There is nothing to do. Please pass `do_train`, `do_eval` and/or `do_predict`.")
         return
 
     # Get the column names for input/target.
@@ -604,21 +609,21 @@ def main():
     if training_args.do_train:
         if "train" not in seq2seq_dataset:
             raise ValueError("--do_train requires a train dataset")
-        logger.info("")
-        logger.info("Training examples before tokenization:")
+        print("")
+        print("Training examples before tokenization:")
         if input_prefix_column in column_names:
-            logger.info(f"input_prefix #0: {seq2seq_dataset['train'][0][input_prefix_column]}")
-        # logger.info(f"input #0: {seq2seq_dataset['train'][0]['input']}")
-        # logger.info(f"output #0: {seq2seq_dataset['train'][0]['output']}")
+            print(f"input_prefix #0: {seq2seq_dataset['train'][0][input_prefix_column]}")
+        # print(f"input #0: {seq2seq_dataset['train'][0]['input']}")
+        # print(f"output #0: {seq2seq_dataset['train'][0]['output']}")
         if input_prefix_column in column_names:
-            logger.info(f"input_prefix #1: {seq2seq_dataset['train'][1][input_prefix_column]}")
-        # logger.info(f"input #1: {seq2seq_dataset['train'][1]['input']}")
-        # logger.info(f"output #1: {seq2seq_dataset['train'][1]['output']}")
-        logger.info("")
+            print(f"input_prefix #1: {seq2seq_dataset['train'][1][input_prefix_column]}")
+        # print(f"input #1: {seq2seq_dataset['train'][1]['input']}")
+        # print(f"output #1: {seq2seq_dataset['train'][1]['output']}")
+        print("")
         untokenized_train_dataset = seq2seq_dataset["train"]
         if data_args.max_train_samples is not None:
             untokenized_train_dataset = untokenized_train_dataset.select(range(data_args.max_train_samples))
-
+        
         if DEBUG:
             # In debug mode, we want ot recreate the data
             data_args.shared_storage = False
@@ -628,10 +633,10 @@ def main():
             ):
 
             if data_args.oracle_training:
-                logger.info("Using oracle training")
+                print("Using oracle training")
                 oracle_processed_dir = f'oracle_input_{data_args.dataset_config_name}'
                 if os.path.isdir(oracle_processed_dir):
-                    logger.info(f"Using oracle training from {oracle_processed_dir}")
+                    print(f"Using oracle training from {oracle_processed_dir}")
                     oracle_training_set = datasets.load_from_disk(oracle_processed_dir)
                 else:
                     rouge_scorer = datasets.load_metric('rouge')
@@ -675,6 +680,8 @@ def main():
                     desc="Chunking train dataset source",
                 )
                 train_dataset = train_dataset.shuffle(seed=training_args.seed)
+            # print length of train dataset
+            print(f"INFO Number of training examples: {len(untokenized_train_dataset)}, after tokenize: {len(train_dataset)}")
 
     if training_args.do_eval:
         max_target_length = data_args.val_max_target_length
@@ -683,17 +690,17 @@ def main():
         preprocess_function_kwargs['max_source_length'] = data_args.eval_max_source_length
         if "validation" not in seq2seq_dataset:
             raise ValueError("--do_eval requires a validation dataset")
-        logger.info("")
-        logger.info("Validation examples before tokenization:")
+        print("")
+        print("Validation examples before tokenization:")
         if input_prefix_column in column_names:
-            logger.info(f"input_prefix #0: {seq2seq_dataset['validation'][0][input_prefix_column]}")
-        # logger.info(f"input #0: {seq2seq_dataset['validation'][0]['input']}")
-        # logger.info(f"output #0: {seq2seq_dataset['validation'][0]['output']}")
+            print(f"input_prefix #0: {seq2seq_dataset['validation'][0][input_prefix_column]}")
+        # print(f"input #0: {seq2seq_dataset['validation'][0]['input']}")
+        # print(f"output #0: {seq2seq_dataset['validation'][0]['output']}")
         if input_prefix_column in column_names:
-            logger.info(f"input_prefix #1: {seq2seq_dataset['validation'][1][input_prefix_column]}")
-        # logger.info(f"input #1: {seq2seq_dataset['validation'][1]['input']}")
-        # logger.info(f"output #1: {seq2seq_dataset['validation'][1]['output']}")
-        logger.info("")
+            print(f"input_prefix #1: {seq2seq_dataset['validation'][1][input_prefix_column]}")
+        # print(f"input #1: {seq2seq_dataset['validation'][1]['input']}")
+        # print(f"output #1: {seq2seq_dataset['validation'][1]['output']}")
+        print("")
         untokenized_eval_dataset = seq2seq_dataset["validation"]
         if data_args.max_eval_samples is not None:
             untokenized_eval_dataset = untokenized_eval_dataset.select(range(data_args.max_eval_samples))
@@ -706,19 +713,21 @@ def main():
         if training_args.eval_fraction != 1:
             if training_args.eval_fraction > 1:
                 assert training_args.eval_fraction == int(training_args.eval_fraction)
-                logger.info(f'using predetermined absolute samples from eval set ({training_args.eval_fraction} )')
+                print(f'using predetermined absolute samples from eval set ({training_args.eval_fraction} )')
                 training_args.eval_fraction = training_args.eval_fraction / n
             indices = np.random.permutation(n)[:int(np.ceil(max(1, training_args.eval_fraction * n)))]
             untokenized_eval_dataset = type(untokenized_eval_dataset).from_dict(untokenized_eval_dataset[indices])
-            logger.info(f'During training, will only use {training_args.eval_fraction:.3%} samples of the eval set '
+            print(f'During training, will only use {training_args.eval_fraction:.3%} samples of the eval set '
                         f'which amounts to {len(untokenized_eval_dataset)} out of {n} samples')
 
+        
         eval_dataset = process_eval_set(data_args, preprocess_function_kwargs, training_args, untokenized_eval_dataset)
         eval_dataset_orig = eval_dataset
         if training_args.eval_fraction < 1:
             eval_dataset_orig = process_eval_set(data_args, preprocess_function_kwargs, training_args,
                                                  untokenized_eval_dataset_orig)
-
+        # print length of eval dataset
+        print(f"INFO Validation examples before tokenization: {len(untokenized_eval_dataset)}, after: {len(eval_dataset)}")
     if training_args.do_predict:
         max_target_length = data_args.val_max_target_length
         preprocess_function_kwargs = preprocess_function_kwargs_fn()
@@ -738,7 +747,7 @@ def main():
         if data_args.test_start_ind is not None:
             sind =  data_args.test_start_ind
             eind = -1 if data_args.test_end_ind is None else data_args.test_end_ind
-            logger.info(f'Using only a subset of the test dataset [{sind}, {eind}]')
+            print(f'Using only a subset of the test dataset [{sind}, {eind}]')
             untokenized_predict_dataset = type(untokenized_predict_dataset).from_dict(untokenized_predict_dataset[sind:eind])
 
         with training_args.main_process_first(
@@ -755,7 +764,7 @@ def main():
             )
 
     if data_args.preprocess_only:
-        logger.info(f"With --preprocess_only, exiting after preprocess_on the data")
+        print(f"With --preprocess_only, exiting after preprocess_on the data")
         exit()
 
     # Data collator
@@ -763,6 +772,7 @@ def main():
     pad_to = 8 if training_args.fp16 and training_args.fp16_padding else None
 
 
+    print("INFO: data_collator")
     data_collator = DataCollatorForSeq2Seq(
         tokenizer,
         model=model,
@@ -771,10 +781,12 @@ def main():
     )
 
     # Metric
+    print("INFO: compute_metrics")
     compute_metrics = load_metric(data_args.metric_names, **locals())
     compute_metrics = load_extra_metrics(data_args.extra_metrics, compute_metrics)
 
     # Initialize our Trainer
+    print("INFO: trainer")
     trainer = CustomTrainer(
         model=model,
         args=training_args,
@@ -788,19 +800,20 @@ def main():
         data_args=data_args,
         callbacks=[EarlyStoppingCallback(early_stopping_patience=data_args.patience)] if data_args.patience is not None else None,
     )
-
     # setup_cometml_trainer_callback(trainer)
 
     # Training
+    print(f"INFO: training_args.do_train {training_args.do_train}")
     if training_args.do_train:
         checkpoint = None
         if training_args.resume_from_checkpoint is not None:
             checkpoint = training_args.resume_from_checkpoint
         elif last_checkpoint is not None:
             checkpoint = last_checkpoint  # look for checkpoints in the outdir
-
+        print(f"INFO: checkpoint {checkpoint}")
+        print("*** Train ***")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
-        logger.info('Done training')
+        print('Done training')
         trainer.save_model()  # Saves the tokenizer too for easy upload
 
         metrics = train_result.metrics
@@ -815,16 +828,18 @@ def main():
 
     # Evaluation
     results = {}
+    print("INFO: training_args.do_eval")
     if training_args.do_eval:
-        logger.info("*** Evaluate ***")
+        print("*** Evaluate ***")
 
         if training_args.eval_fraction < 1:
-            logger.info('setting the eval set back to the full one')
+            print('setting the eval set back to the full one')
             trainer.eval_dataset = eval_dataset_orig
             trainer._untokenized_eval_dataset = untokenized_eval_dataset_orig
 
+        pdb.set_trace()
         metrics = trainer.evaluate(metric_key_prefix="eval", use_cache=True, length_penalty=data_args.length_penalty)
-        logger.info('Done evaluating')
+        print('Done evaluating')
 
         max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
@@ -833,27 +848,27 @@ def main():
         trainer.save_metrics("eval", metrics)
 
     if training_args.do_predict:
-        logger.info("*** Predict ***")
+        print("*** Predict ***")
         trainer.args.predict_with_generate = True # during prediction, we don't have labels
 
         # load last (and best) model, or the one specified if any
-        logger.info("*** Loading model weights before the prediction ***")
+        print("*** Loading model weights before the prediction ***")
         last_checkpoint = model_args.model_name_or_path if os.path.isdir(model_args.model_name_or_path) else _detect_last_checkpoint(training_args)
         if last_checkpoint is not None and os.path.isdir(last_checkpoint):
-            logger.info(f'Loading weights from {last_checkpoint} for the prediction')
+            print(f'Loading weights from {last_checkpoint} for the prediction')
             state_dict = torch.load(os.path.join(last_checkpoint, WEIGHTS_NAME), map_location="cpu")
             # If the model is on the GPU, it still works!
             # trainer._load_state_dict_in_model(state_dict)
             # release memory
             del state_dict
-            logger.info("*** Done loading weights ***")
+            print("*** Done loading weights ***")
         elif training_args.do_train:
             raise ValueError('Could not find a model to load for prediction')
         else:
-            logger.info(f'Using {model_args.model_name_or_path} as the model for the prediction')
+            print(f'Using {model_args.model_name_or_path} as the model for the prediction')
 
         predict_results = trainer.predict(predict_dataset, metric_key_prefix="predict", use_cache=True)
-        logger.info('Done predicting')
+        print('Done predicting')
 
         metrics = predict_results.metrics
         max_predict_samples = (
@@ -898,7 +913,7 @@ def _detect_last_checkpoint(training_args):
             last_checkpoint = get_last_checkpoint(training_args.output_dir)
 
             if last_checkpoint is not None and training_args.resume_from_checkpoint is None:
-                logger.info(
+                print(
                     f"Checkpoint detected, resuming training at {last_checkpoint}. To avoid this behavior, change "
                     "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
                 )
@@ -962,10 +977,12 @@ def _get_dataset(data_args, model_args, training_args):
 
 
 def set_up_logging(training_args):
+    print(f"Logging at {training_args.output_dir}")
     logging.basicConfig(
+        filename=os.path.join(training_args.output_dir, "training.log"),
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout)],
+        # handlers=[logging.StreamHandler(sys.stdout)],
     )
     log_level = training_args.get_process_log_level()
     logger.setLevel(log_level)
@@ -978,7 +995,7 @@ def set_up_logging(training_args):
         f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
         + f"distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
     )
-    logger.info(f"Training/evaluation parameters {training_args}")
+    print(f"Training/evaluation parameters {training_args}")
 
 def extract_oracle_sent_batch(examples, max_length, tokenizer, rouge_scorer):
     items = examples.data.items()
