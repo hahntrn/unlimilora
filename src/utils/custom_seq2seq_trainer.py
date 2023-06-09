@@ -124,7 +124,7 @@ class CustomTrainer(Seq2SeqTrainer):
         gen_kwargs['use_cache'] = True
         print(gen_kwargs)
         generated_tokens = self.model.generate(
-            generation_inputs,
+            #generation_inputs
             #**gen_kwargs,
         )
         # --------------------- addition compared to the source file --------------------
