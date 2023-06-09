@@ -526,13 +526,14 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Applying Lora int-8")
+    print("Applying Lora int-8 with better config")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
     lora_config = LoraConfig(
         r=1,
         task_type=TaskType.SEQ_2_SEQ_LM
+        lora_dropout=0.05,
     )
     # prepare int-8 model for training
     model = prepare_model_for_int8_training(model)
