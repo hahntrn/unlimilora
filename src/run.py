@@ -536,6 +536,7 @@ def main():
         lora_dropout=0.05,
         lora_alpha=1,
         bias="none",
+        target_modules=["q_proj","v_proj"],
     )
     # prepare int-8 model for training
     model = prepare_model_for_int8_training(model)
