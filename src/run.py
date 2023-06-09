@@ -110,6 +110,14 @@ class ModelArguments:
     drop_duplicates_in_eval: bool = field(
         default=True,
     )
+    use_lora: bool = field(
+        default=False,
+        metadata={"help": "Whether to use LoRA or not."},
+    )
+    use_int8: bool = field(
+        default=False,
+        metadata={"help": "Whether to use Qint8 or not."},
+    )
 
     def __post_init__(self):
         pass
@@ -526,25 +534,34 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Applying Lora int-8 with better config")
-    from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
+    # --- LoRA ---------------------------------------------------------------------------
+    
+    # from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
-    # Define LoRA Config
-    model.enable_input_require_grads()
-    lora_config = LoraConfig(
-        r=1,
-        task_type=TaskType.SEQ_2_SEQ_LM,
-        lora_dropout=0.05,
-        lora_alpha=1,
-        bias="none",
-        target_modules=["q_proj","v_proj"],
-    )
-    # prepare int-8 model for training
-    model = prepare_model_for_int8_training(model)
+    if model_args.use_lora:
+        print("Applying Lora with better config")
+        # Define LoRA Config
+        # model.enable_input_require_grads()
+        lora_config = LoraConfig(
+            r=1,
+            task_type=TaskType.SEQ_2_SEQ_LM,
+            lora_dropout=0.05,
+            lora_alpha=1,
+            bias="none",
+            target_modules=["q_proj","v_proj"],
+        )
+    if model_args.use_int8:
+        print("Applying Qint8 with better config")
+        # prepare int-8 model for training
+        # model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    model = get_peft_model(model, lora_config)
-    model.print_trainable_parameters()
+    if model_args.use_lora:
+        if training_args.do_train:
+            pass
+            # model = get_peft_model(model, lora_config)
+        # model.print_trainable_parameters()
+    # --- END LoRA ---------------------------------------------------------------------------
 
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:
