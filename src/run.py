@@ -530,6 +530,7 @@ def main():
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
+    model.enable_input_require_grads()
     lora_config = LoraConfig(
         r=1,
         task_type=TaskType.SEQ_2_SEQ_LM,
