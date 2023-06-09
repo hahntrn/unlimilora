@@ -33,7 +33,7 @@ import nltk
 # we import the logging frameworks before any other import to make sure all monkey patching for the logging are active
 # from sled import SledConfig
 
-import wandb
+# import wandb
 import torch
 
 sys.path.insert(0, os.path.dirname(__file__))  # seq2seq package path
@@ -61,7 +61,7 @@ from transformers import DataCollatorForSeq2Seq
 from datasets import load_dataset
 
 # noinspection PyUnresolvedReferences
-# import sled  # *** required so that SledModels will be registered for the AutoClasses ***
+import sled  # *** required so that SledModels will be registered for the AutoClasses ***
 
 from utils.config import handle_args_to_ignore
 from utils.decoding import decode
@@ -75,7 +75,6 @@ from metrics.metrics import HFMetricWrapper, MetricCollection
 logger = logging.getLogger('sled')
 
 PREFIX_DOC_SEP = '\n\n'
-TINY = True
 DEBUG = os.environ.get('DEBUG', 'false').lower() in {'1', 'true', 'yes'}  # If set, will set some configuration to help debug
 if DEBUG:
     assert not torch.cuda.is_available() or torch.cuda.device_count() == 1
@@ -413,7 +412,7 @@ def main():
 
 
     # Added to avoid wandb.errors.UsageError: Error communicating with wandb process
-    wandb.init(settings=wandb.Settings(start_method="fork"), name=training_args.output_dir)
+    # wandb.init(settings=wandb.Settings(start_method="fork"), name=training_args.output_dir)
 
     # Used to find missing dependencies early on
     load_metric(data_args.metric_names, **locals())
@@ -501,7 +500,6 @@ def main():
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
         )
-        # pdb.set_trace()
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
@@ -837,7 +835,6 @@ def main():
             trainer.eval_dataset = eval_dataset_orig
             trainer._untokenized_eval_dataset = untokenized_eval_dataset_orig
 
-        pdb.set_trace()
         metrics = trainer.evaluate(metric_key_prefix="eval", use_cache=True, length_penalty=data_args.length_penalty)
         print('Done evaluating')
 
