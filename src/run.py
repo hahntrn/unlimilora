@@ -532,7 +532,7 @@ def main():
     # Define LoRA Config
     lora_config = LoraConfig(
         r=1,
-        task_type=TaskType.SEQ_2_SEQ_LM
+        task_type=TaskType.SEQ_2_SEQ_LM,
         lora_dropout=0.05,
     )
     # prepare int-8 model for training
