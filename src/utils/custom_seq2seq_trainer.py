@@ -125,7 +125,7 @@ class CustomTrainer(Seq2SeqTrainer):
         print(gen_kwargs)
         generated_tokens = self.model.generate(
             generation_inputs
-            #**gen_kwargs,
+            **gen_kwargs,
         )
         # --------------------- addition compared to the source file --------------------
         _clean_memory()
