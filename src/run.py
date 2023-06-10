@@ -499,6 +499,7 @@ def main():
             cache_dir=model_args.cache_dir,
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
+            load_in_8bit=True,
         )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
@@ -526,7 +527,7 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Applying Lora int-8 with better config")
+    print("Applying Lora WITH int-8 with better config")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
