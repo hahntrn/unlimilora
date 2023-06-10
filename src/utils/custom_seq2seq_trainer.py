@@ -123,7 +123,9 @@ class CustomTrainer(Seq2SeqTrainer):
          # Uri: to make sure we use cache even during mid-training evaluation, where this is disabled in general:
         gen_kwargs['use_cache'] = True
         print(inputs)
-        gen_kwargs[self.model.main_input_name] = generation_inputs
+        for k in generation_inputs:
+            gen_kwargs[k] = generation_inputs[k]
+        #gen_kwargs[self.model.main_input_name] = generation_inputs
         print(gen_kwargs)
         generated_tokens = self.model.generate(
             #input_ids=generation_inputs,
