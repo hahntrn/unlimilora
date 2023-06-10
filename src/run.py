@@ -526,11 +526,7 @@ def main():
         if unlimiformer_args.random_unlimiformer_training:
             model = RandomTrainingUnlimiformer.convert_model(model, **unlimiformer_kwargs)
         else:
-            model = torch.ao.quantization.quantize_dynamic(
-            model,  # the original model
-            {torch.nn.Linear},  # a set of layers to dynamically quantize
-            dtype=torch.qint8)  # the target dtype for quantized weights
-            print('here applesauce')
+            
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
     print("Just doing eval with shuffle and quuuu")
