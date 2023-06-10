@@ -539,10 +539,10 @@ def main():
     # dtype=torch.qint8)  # the target dtype for quantized weights
 
     lora_config = LoraConfig(
-        r=1,
+        r=8,
         task_type=TaskType.SEQ_2_SEQ_LM,
         lora_dropout=0.05,
-        lora_alpha=1,
+        lora_alpha=8,
         bias="none",
         target_modules=["q_proj","v_proj"],
     )
