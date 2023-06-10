@@ -499,8 +499,8 @@ def main():
             cache_dir=model_args.cache_dir,
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
-            device_map='auto',
-            load_in_8bit=True,
+            #device_map='auto',
+            #load_in_8bit=True,
         )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
