@@ -509,7 +509,7 @@ def main():
         from accelerate import load_checkpoint_and_dispatch
 
         model = load_checkpoint_and_dispatch(
-            model, model_args.model_name_or_path, device_map="auto" )
+            model, "bart-base", device_map="auto" )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
