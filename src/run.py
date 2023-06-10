@@ -503,7 +503,7 @@ def main():
         )
         from huggingface_hub import hf_hub_download
         from accelerate import init_empty_weights
-        weights_location = hf_hub_download("bart-base", 'pytorch_model.bin')
+        weights_location = hf_hub_download("facebook/bart-base", 'pytorch_model.bin')
         with init_empty_weights():
             model = AutoModelForSeq2SeqLM.from_config(config)
         model.tie_weights()
