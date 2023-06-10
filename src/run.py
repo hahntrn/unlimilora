@@ -410,6 +410,7 @@ def main():
     print(f"Model Arguments: {model_args}")
     print(f"Unlimiformer Arguments: {unlimiformer_args}")
 
+    # training_args.do_eval = False
 
     # Added to avoid wandb.errors.UsageError: Error communicating with wandb process
     # wandb.init(settings=wandb.Settings(start_method="fork"), name=training_args.output_dir)
@@ -539,15 +540,15 @@ def main():
     # dtype=torch.qint8)  # the target dtype for quantized weights
 
     lora_config = LoraConfig(
-        r=8,
+        r=1,
         task_type=TaskType.SEQ_2_SEQ_LM,
         lora_dropout=0.05,
-        lora_alpha=8,
+        lora_alpha=1,
         bias="none",
         target_modules=["q_proj","v_proj"],
     )
     # prepare int-8 model for training
-    #model = prepare_model_for_int8_training(model)
+    # model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
     model = get_peft_model(model, lora_config)
@@ -839,6 +840,7 @@ def main():
         print("*** Train ***")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         print('Done training')
+        # import pdb; pdb.set_trace()
         trainer.save_model()  # Saves the tokenizer too for easy upload
 
         metrics = train_result.metrics
