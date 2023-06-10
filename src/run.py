@@ -558,10 +558,10 @@ def main():
     if model.config.decoder_start_token_id is None:
         raise ValueError("Make sure that `config.decoder_start_token_id` is correctly defined")
 
-    model = torch.ao.quantization.quantize_dynamic(
-    model,  # the original model
-    #{torch.nn.Linear},  # a set of layers to dynamically quantize
-    dtype=torch.qint8)  # the target dtype for quantized weights
+    # model = torch.ao.quantization.quantize_dynamic(
+    # model,  # the original model
+    # #{torch.nn.Linear},  # a set of layers to dynamically quantize
+    # dtype=torch.qint8)  # the target dtype for quantized weights
 
     prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
 
