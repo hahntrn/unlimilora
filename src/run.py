@@ -545,8 +545,8 @@ def main():
     #model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    #model = get_peft_model(model, lora_config)
-    #model.print_trainable_parameters()
+    model = get_peft_model(model, lora_config)
+    model.print_trainable_parameters()
 
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:
