@@ -492,7 +492,7 @@ def main():
     )
     if model_args.model_name_or_path is not None:
         print(f"INFO: Loading an AutoModelForSeq2SeqLM model from {model_args.model_name_or_path}")
-        model = AutoModelForSeq2SeqLM.from_pretrained(
+        config = AutoConfig.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
@@ -501,6 +501,15 @@ def main():
             use_auth_token=training_args.use_auth_token,
             load_in_8bit=True,
         )
+        from accelerate import init_empty_weights
+
+        with init_empty_weights():
+            model = AutoModelForSeq2SeqLM.from_config(config)
+        model.tie_weights()
+        from accelerate import load_checkpoint_and_dispatch
+
+        model = load_checkpoint_and_dispatch(
+            model, model_args.model_name_or_path, device_map="auto" )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
