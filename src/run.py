@@ -528,7 +528,7 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Just doing eval")
+    print("Just doing eval with shuffle")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
@@ -545,7 +545,7 @@ def main():
     #model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    model = get_peft_model(model, lora_config)
+    #model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
     model.config.use_cache = True
@@ -984,6 +984,7 @@ def _get_dataset(data_args, model_args, training_args):
         download_mode=data_args.download_mode,
         use_auth_token=training_args.use_auth_token
     )
+    seq2seq_dataset = seq2seq_dataset.shuffle()
     if training_args.do_train:
         training_args.apply_overrides(len(seq2seq_dataset['train']))
     if data_args.evaluate_on_training_data:
