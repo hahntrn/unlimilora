@@ -501,15 +501,16 @@ def main():
             use_auth_token=training_args.use_auth_token,
             load_in_8bit=True,
         )
+        from huggingface_hub import hf_hub_download
         from accelerate import init_empty_weights
-
+        weights_location = hf_hub_download("bart-base", 'pytorch_model.bin')
         with init_empty_weights():
             model = AutoModelForSeq2SeqLM.from_config(config)
         model.tie_weights()
         from accelerate import load_checkpoint_and_dispatch
 
         model = load_checkpoint_and_dispatch(
-            model, "bart-base", device_map="auto" )
+            model, weights_location, device_map="auto" )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
