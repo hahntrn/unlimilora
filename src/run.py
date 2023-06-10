@@ -528,15 +528,15 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Just doing eval with shuffle and lora")
+    print("Just doing eval with shuffle and quant")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
     model.enable_input_require_grads()
-    # model = torch.ao.quantization.quantize_dynamic(
-    # model,  # the original model
-    # #{torch.nn.Linear},  # a set of layers to dynamically quantize
-    # dtype=torch.qint8)  # the target dtype for quantized weights
+    model = torch.ao.quantization.quantize_dynamic(
+    model,  # the original model
+    #{torch.nn.Linear},  # a set of layers to dynamically quantize
+    dtype=torch.qint8)  # the target dtype for quantized weights
 
     lora_config = LoraConfig(
         r=1,
@@ -550,8 +550,8 @@ def main():
     #model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    model = get_peft_model(model, lora_config)
-    model.print_trainable_parameters()
+    #model = get_peft_model(model, lora_config)
+    #model.print_trainable_parameters()
 
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:
