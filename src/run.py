@@ -554,7 +554,7 @@ def main():
         logger.warning('Cannot use cache in models when using gradient checkpointing. turning it off')
         model.config.use_cache = False
 
-    model.resize_token_embeddings(len(tokenizer))
+    #model.resize_token_embeddings(len(tokenizer))
 
     if model.config.decoder_start_token_id is None:
         raise ValueError("Make sure that `config.decoder_start_token_id` is correctly defined")
