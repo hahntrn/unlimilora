@@ -528,12 +528,11 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Just doing eval with shuffle and quant")
+    print("Just doing eval with shuffle")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
     model.enable_input_require_grads()
-    
     lora_config = LoraConfig(
         r=1,
         task_type=TaskType.SEQ_2_SEQ_LM,
@@ -558,11 +557,6 @@ def main():
 
     if model.config.decoder_start_token_id is None:
         raise ValueError("Make sure that `config.decoder_start_token_id` is correctly defined")
-
-    model = torch.ao.quantization.quantize_dynamic(
-    model,  # the original model
-    #{torch.nn.Linear},  # a set of layers to dynamically quantize
-    dtype=torch.qint8)  # the target dtype for quantized weights
 
     prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
 
