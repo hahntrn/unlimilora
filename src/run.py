@@ -528,7 +528,7 @@ def main():
         else:
             model = Unlimiformer.convert_model(model, **unlimiformer_kwargs)
 
-    print("Applying Lora WITH int-8 with better config")
+    print("Just doing eval")
     from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
 
     # Define LoRA Config
@@ -542,11 +542,11 @@ def main():
         target_modules=["q_proj","v_proj"],
     )
     # prepare int-8 model for training
-    model = prepare_model_for_int8_training(model)
+    #model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    model = get_peft_model(model, lora_config)
-    model.print_trainable_parameters()
+    #model = get_peft_model(model, lora_config)
+    #model.print_trainable_parameters()
 
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:
