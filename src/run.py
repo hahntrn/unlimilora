@@ -554,8 +554,12 @@ def main():
         logger.warning('Cannot use cache in models when using gradient checkpointing. turning it off')
         model.config.use_cache = False
 
-    #model.resize_token_embeddings(len(tokenizer))
-
+    model.resize_token_embeddings(len(tokenizer))
+    model = torch.ao.quantization.quantize_dynamic(
+            model,  # the original model
+            {torch.nn.Linear},  # a set of layers to dynamically quantize
+            dtype=torch.qint8)  # the target dtype for quantized weights
+    print('here 2applesauce')
     if model.config.decoder_start_token_id is None:
         raise ValueError("Make sure that `config.decoder_start_token_id` is correctly defined")
 

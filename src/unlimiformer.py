@@ -714,11 +714,7 @@ class Unlimiformer(Generic[ModelType]):
             LEDModel: UnlimiformerLED,
             LEDForConditionalGeneration: UnlimiformerLED,
         }
-        model_clone = torch.ao.quantization.quantize_dynamic(
-            model_clone,  # the original model
-            {torch.nn.Linear},  # a set of layers to dynamically quantize
-            dtype=torch.qint8)  # the target dtype for quantized weights
-        print('here 2applesauce')
+        
         type_to_class[type(model_clone)](model_clone, *args, **kwargs)
         return model_clone
         
