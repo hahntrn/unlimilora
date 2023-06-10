@@ -492,7 +492,7 @@ def main():
     )
     if model_args.model_name_or_path is not None:
         print(f"INFO: Loading an AutoModelForSeq2SeqLM model from {model_args.model_name_or_path}")
-        model = AutoConfigForSeq2SeqLM.from_pretrained(
+        model = AutoModelForSeq2SeqLM.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
