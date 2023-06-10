@@ -492,25 +492,16 @@ def main():
     )
     if model_args.model_name_or_path is not None:
         print(f"INFO: Loading an AutoModelForSeq2SeqLM model from {model_args.model_name_or_path}")
-        config = AutoConfig.from_pretrained(
+        model = AutoConfigForSeq2SeqLM.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
             cache_dir=model_args.cache_dir,
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
+            device_map='auto',
             load_in_8bit=True,
         )
-        from huggingface_hub import hf_hub_download
-        from accelerate import init_empty_weights
-        weights_location = hf_hub_download("facebook/bart-base", 'pytorch_model.bin')
-        with init_empty_weights():
-            model = AutoModelForSeq2SeqLM.from_config(config)
-        model.tie_weights()
-        from accelerate import load_checkpoint_and_dispatch
-
-        model = load_checkpoint_and_dispatch(
-            model, weights_location, device_map="auto" )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
             config,
