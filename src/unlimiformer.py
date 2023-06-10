@@ -51,7 +51,7 @@ class Unlimiformer(Generic[ModelType]):
         self.test_datastore = test_datastore # flag for debugging
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.device = torch.device('mps')
+        # self.device = torch.device('mps')
         self.activation_capturer = None
         self.is_encoder_decoder = model.config.is_encoder_decoder
         self.hook_handles = []
