@@ -500,6 +500,7 @@ def main():
             cache_dir=model_args.cache_dir,
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
+            state_dict=os.path.join(model_args.model_name_or_path, 'state_dict.pt'),
             #device_map='auto',
             #load_in_8bit=True,
         )
@@ -540,10 +541,10 @@ def main():
     # dtype=torch.qint8)  # the target dtype for quantized weights
 
     lora_config = LoraConfig(
-        r=1,
+        r=8,
         task_type=TaskType.SEQ_2_SEQ_LM,
         lora_dropout=0.05,
-        lora_alpha=1,
+        lora_alpha=8,
         bias="none",
         target_modules=["q_proj","v_proj"],
     )
@@ -842,6 +843,7 @@ def main():
         print('Done training')
         # import pdb; pdb.set_trace()
         trainer.save_model()  # Saves the tokenizer too for easy upload
+        torch.save(trainer.model.model.model.state_dict(), f"{training_args.output_dir}/state_dict.pt")
 
         metrics = train_result.metrics
         max_train_samples = (
