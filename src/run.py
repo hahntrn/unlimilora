@@ -29,6 +29,7 @@ from unlimiformer import Unlimiformer
 from random_training_unlimiformer import RandomTrainingUnlimiformer
 
 import nltk
+nltk.download('punkt')
 
 # we import the logging frameworks before any other import to make sure all monkey patching for the logging are active
 # from sled import SledConfig
@@ -499,8 +500,8 @@ def main():
             cache_dir=model_args.cache_dir,
             revision=model_args.model_revision,
             use_auth_token=training_args.use_auth_token,
-            #device_map='auto',
-            #load_in_8bit=True,
+            device_map='auto',
+            load_in_8bit=True
         )
     else:
         model = AutoModelForSeq2SeqLM.from_config(
@@ -544,14 +545,14 @@ def main():
         lora_dropout=0.05,
         lora_alpha=1,
         bias="none",
-        target_modules=["q_proj","v_proj"],
+        target_modules=["query","value"],
     )
     # prepare int-8 model for training
-    #model = prepare_model_for_int8_training(model)
+    model = prepare_model_for_int8_training(model)
 
     # add LoRA adaptor
-    model = get_peft_model(model, lora_config)
-    model.print_trainable_parameters()
+    # model = get_peft_model(model, lora_config)
+    # model.print_trainable_parameters()
 
     model.config.use_cache = True
     if training_args.gradient_checkpointing and getattr(model.config, 'use_cache', False) and training_args.do_train:

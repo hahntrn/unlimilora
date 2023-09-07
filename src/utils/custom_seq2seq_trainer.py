@@ -121,15 +121,16 @@ class CustomTrainer(Seq2SeqTrainer):
             generation_inputs = inputs[self.model.main_input_name]
 
          # Uri: to make sure we use cache even during mid-training evaluation, where this is disabled in general:
+        import pdb; pdb.set_trace()
         gen_kwargs['use_cache'] = True
-        #print(inputs)
-        for k in inputs:
-            print(k)
-            gen_kwargs[k] = inputs[k]
-        #gen_kwargs[self.model.main_input_name] = generation_inputs
-        #print(gen_kwargs)
+        # print(inputs)
+        # for k in inputs:
+        #     print(k)
+        #     gen_kwargs[k] = inputs[k]
+        # gen_kwargs[self.model.main_input_name] = generation_inputs
+        print(gen_kwargs)
         generated_tokens = self.model.generate(
-            #input_ids=generation_inputs,
+            input_ids=generation_inputs,
             **gen_kwargs
         )
         # --------------------- addition compared to the source file --------------------
